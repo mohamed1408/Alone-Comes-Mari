@@ -1,0 +1,134 @@
+{
+  "project_info": {
+    "project_number": "276626464349",
+    "project_id": "alonecomesmari",
+    "storage_bucket": "alonecomesmari.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:276626464349:android:93f3af393116c1cf1d77b4",
+        "android_client_info": {
+          "package_name": "com.alonecomesmari"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "276626464349-rj9nqp9qjhf32ge1e53sklijt79c2ab8.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.alonecomesmari",
+            "certificate_hash": "5e8f16062ea3cd2c4a0d547876baa6f38cabf625"
+          }
+        },
+        {
+          "client_id": "276626464349-lqhmgigjicgkrcuvjcdjc6u40n6pl197.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCPOrvYsMAGQaqhxFnTBU0lNlyhwC2v2dQ"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "276626464349-lqhmgigjicgkrcuvjcdjc6u40n6pl197.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "276626464349-44icdsfooapiege4g3a4humitkvfqrcd.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.alonecomesmari"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:276626464349:android:cd967983e19ce96f1d77b4",
+        "android_client_info": {
+          "package_name": "com.alongcomesmari.customerapp"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "276626464349-lqhmgigjicgkrcuvjcdjc6u40n6pl197.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCPOrvYsMAGQaqhxFnTBU0lNlyhwC2v2dQ"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "276626464349-lqhmgigjicgkrcuvjcdjc6u40n6pl197.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "276626464349-44icdsfooapiege4g3a4humitkvfqrcd.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.alonecomesmari"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:276626464349:android:cdb6c6d9e3c69d7e1d77b4",
+        "android_client_info": {
+          "package_name": "com.deliveryapp"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "276626464349-63caihi7jh409avd7gfv9s4p1m92gk01.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.deliveryapp",
+            "certificate_hash": "42325ce5353289ab96ca24c18cfe05a2e1bdef7d"
+          }
+        },
+        {
+          "client_id": "276626464349-lqhmgigjicgkrcuvjcdjc6u40n6pl197.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCPOrvYsMAGQaqhxFnTBU0lNlyhwC2v2dQ"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "276626464349-lqhmgigjicgkrcuvjcdjc6u40n6pl197.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "276626464349-44icdsfooapiege4g3a4humitkvfqrcd.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.alonecomesmari"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
