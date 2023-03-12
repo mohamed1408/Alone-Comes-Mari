@@ -353,7 +353,7 @@ const DrivinglicensefrontScreen = ({navigation}) => {
 
   const retake = () => {
     setModalVisiblethree(false)
-    opencamera()
+    requestCameraPermission()
   }
 
   const handlesubmitform = async () => {
