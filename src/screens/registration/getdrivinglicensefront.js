@@ -23,6 +23,8 @@ import {axiosInstance} from '../../services';
 import {SafeAreaView} from 'react-native';
 import TextRecognition from 'react-native-text-recognition';
 import cities from './azcities.json';
+import FaceDetection, { FaceDetectorContourMode, FaceDetectorLandmarkMode, FaceContourType } from "react-native-face-detection";
+
 // import Tesseract, {createWorker} from 'tesseract.js';
 // import TesseractOcr, {
 //   LANG_ENGLISH,
@@ -197,6 +199,124 @@ const DrivinglicensefrontScreen = ({navigation}) => {
   //   useEventListener('onProgressChange', p => {
   //     setProgress(p.percent / 100);
   //   });
+  const getcityname = rawcityname => {
+    console.log(rawcityname);
+    let matchedchars = '',
+      CITY = '',
+      matchedcities,
+      wordcount = rawcityname.trim().split(' ').length;
+    rawcityname
+      .toLowerCase()
+      .split('')
+      .forEach(c => {
+        matchedchars += c;
+        let rgx = new RegExp('^' + matchedchars);
+        matchedcities = cities.filter(
+          x =>
+            rgx.test(x.toLowerCase()) &&
+            x.toLowerCase().trim().split(' ').length == wordcount,
+        );
+        if (matchedcities.length == 1) {
+          CITY = matchedcities[0];
+        } else {
+          CITY = matchedcities.filter(
+            x => x.toLowerCase() == rawcityname.toLowerCase(),
+          );
+        }
+      });
+    console.log(matchedcities, CITY);
+    return CITY;
+  };
+  const extractUserDetails = l => {
+    let details = {
+      firstname: '',
+      lastname: '',
+      dob: '',
+      address: '',
+      city: '',
+    };
+    let date1Regex =
+      /(0?[1-9]|1[012])[\/\-](0?[1-9]|[12][0-9]|3[01])[\/\-]\d{4}/g;
+    let date2Regex =
+      /(0?[1-9]|1[012])[\/\-](0?[1-9]|[12][0-9]|3[01])[\/\-]\d{2}/g;
+    let date1 = [],
+      date2 = [];
+    let cityrgx = new RegExp(/.+?(?=, AZ)/g);
+    l.forEach((a, ai) => {
+      if (a.toLowerCase().includes('rest none')) {
+        //console.log(l[ai+1])
+      }
+      if (a.match(date1Regex)) {
+        // console.log(a.match(date1Regex))
+        date1 = [...date1, ...a.match(date1Regex)];
+      }
+      if (a.match(date2Regex)) {
+        //console.log(a.match(date2Regex))
+        date2 = [...date2, ...a.match(date2Regex)];
+      }
+    });
+    date1.forEach(d => {
+      let isBirthday = false;
+      let dregex = new RegExp('^(' + d.slice(0, 6) + ')(' + d.slice(-2) + ')$');
+      //console.log(d, dregex)
+      date2.forEach(d2 => {
+        //console.log(dregex.test(d2))
+        isBirthday = isBirthday || dregex.test(d2);
+      });
+      //console.log("-".repeat(30))
+      if (isBirthday) {
+        details.dob = d;
+      }
+    });
+    let az_index = l.findIndex(x => x.toLowerCase().includes('az'));
+    let name_address = l[az_index].split('\n');
+    name_address = l[az_index]
+      .split('\n')
+      .slice(
+        0,
+        l[az_index].split('\n').findIndex(x => x.toLowerCase().includes('az')) +
+          1,
+      );
+    //.slice(-4);
+    console.log(
+      'name_address: ',
+      name_address,
+      l[az_index].split('\n').findIndex(x => x.toLowerCase().includes('az')),
+    );
+    if (name_address.length < 4) {
+      // let rest = l[az_index - 1]
+      //   .split('\n')
+      //   .slice(-1 * (4 - name_address.length));
+      console.log(
+        extract_name_address(l, az_index - 1, 4 - name_address.length),
+      );
+      name_address = [
+        ...extract_name_address(l, az_index - 1, 4 - name_address.length),
+        ...name_address,
+      ];
+    }
+    details.firstname = name_address[1].replace(/(2 )|(2)/g, '');
+    details.lastname = name_address[0].replace(/(1 )|(1)/g, '');
+    details.address = name_address[2].replace(/^8 /, '');
+    details.city = getcityname(name_address[3].match(cityrgx)[0]);
+    console.log(name_address, details);
+    console.log("First Name: " + details.firstname)
+    console.log("Last Name: " + details.lastname)
+    console.log("Address: " + details.address)
+    console.log("City: " + details.city)
+  };
+  const extract_name_address = (l, index, rest_length) => {
+    let rest = l[index].split('\n').slice(-1 * rest_length);
+    console.log(rest, rest_length);
+    if (rest.length < rest_length) {
+      rest = [
+        ...extract_name_address(l, index - 1, rest_length - rest.length),
+        ...rest,
+      ];
+    }
+    return rest;
+  };
+
   const extractText = async imageUri => {
     // storeagePerm();
     const result = await TextRecognition.recognize(imageUri, {
@@ -212,6 +332,7 @@ const DrivinglicensefrontScreen = ({navigation}) => {
     // console.log(response.data);
     // const tessOptions = {level: LEVEL_WORD};
     // TesseractOcr.recognizeTokens(imageSource, LANG_ENGLISH, tessOptions);
+    extractUserDetails(result);
   };
 
   const handlesubmitform = async () => {
@@ -439,45 +560,4 @@ export default DrivinglicensefrontScreen;
 // 	birthday: "",
 // 	address: "",
 // 	email: ""
-// }
-// const extract = (l) => {
-// 	let date1Regex = /(0?[1-9]|1[012])[\/\-](0?[1-9]|[12][0-9]|3[01])[\/\-]\d{4}/g
-// 	let date2Regex = /(0?[1-9]|1[012])[\/\-](0?[1-9]|[12][0-9]|3[01])[\/\-]\d{2}/g
-// 	let date1 = [], date2 = []
-// 	//res.forEach(l => {
-// 	    l.forEach((a,ai) => {
-// 	        if(a.toLowerCase().includes("rest none")) {
-// 	            //console.log(l[ai+1])
-// 	        }
-// 	        if(a.match(date1Regex)) {
-// 		        // console.log(a.match(date1Regex))
-// 		        date1 = [...date1, ...a.match(date1Regex)]
-// 	        }
-// 	        if(a.match(date2Regex)){
-// 		        //console.log(a.match(date2Regex))
-// 		        date2 = [...date2, ...a.match(date2Regex)]
-// 	        }
-// 	    })
-// 	    date1.forEach(d => {
-// 	    	let isBirthday = false
-// 	    	let dregex = new RegExp('^(' + d.slice(0,6) + ')(' + d.slice(-2) + ")$")
-// 	    	//console.log(d, dregex)
-// 	    	date2.forEach(d2 => {
-// 	    		//console.log(dregex.test(d2))
-// 	    		isBirthday = isBirthday || dregex.test(d2) 
-// 	    	})
-// 	    	//console.log("-".repeat(30))
-// 	    	if(isBirthday){
-// 	    		details.birthday = d
-// 	    	}
-// 	    })
-// 	    let az_index = l.findIndex(x => x.toLowerCase().includes('az'))
-// 	    console.log(l[az_index].split('\n'))
-// 	    let name_address = l[az_index].split('\n')
-// 	    if(name_address.length < 4) {
-// 	    	let rest = l[az_index-1].split('\n').slice(-1*(4-name_address.length))
-// 	    	console.log(rest)
-// 	    }
-// 	    console.log(details)
-// 	//})
 // }
