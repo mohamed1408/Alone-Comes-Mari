@@ -23,7 +23,11 @@ import {axiosInstance} from '../../services';
 import {SafeAreaView} from 'react-native';
 import TextRecognition from 'react-native-text-recognition';
 import cities from './azcities.json';
-import FaceDetection, { FaceDetectorContourMode, FaceDetectorLandmarkMode, FaceContourType } from "react-native-face-detection";
+import FaceDetection, {
+  FaceDetectorContourMode,
+  FaceDetectorLandmarkMode,
+  FaceContourType,
+} from 'react-native-face-detection';
 
 // import Tesseract, {createWorker} from 'tesseract.js';
 // import TesseractOcr, {
@@ -34,6 +38,13 @@ import FaceDetection, { FaceDetectorContourMode, FaceDetectorLandmarkMode, FaceC
 const DrivinglicensefrontScreen = ({navigation}) => {
   const [userid, setuserid] = React.useState('');
   const [useremail, setuseremail] = React.useState('');
+  const [extractedDetails, setExtractedDetails] = React.useState({
+    firstname: '',
+    lastname: '',
+    dob: '',
+    address: '',
+    city: '',
+  });
   React.useEffect(() => {
     async function getdata() {
       const userid = await AsyncStorage.getItem('userid');
@@ -88,6 +99,7 @@ const DrivinglicensefrontScreen = ({navigation}) => {
   const [imageuploaderror, setimageuploaderror] = React.useState('');
   const [modalVisible, setModalVisible] = React.useState(false);
   const [modalVisibletwo, setModalVisibletwo] = React.useState(false);
+  const [modalVisiblethree, setModalVisiblethree] = React.useState(false);
   const [spinner, setspinner] = React.useState(false);
 
   function requestCameraPermission() {
@@ -200,7 +212,7 @@ const DrivinglicensefrontScreen = ({navigation}) => {
   //     setProgress(p.percent / 100);
   //   });
   const getcityname = rawcityname => {
-    console.log(rawcityname);
+    // console.log(rawcityname);
     let matchedchars = '',
       CITY = '',
       matchedcities,
@@ -224,7 +236,7 @@ const DrivinglicensefrontScreen = ({navigation}) => {
           );
         }
       });
-    console.log(matchedcities, CITY);
+    // console.log(matchedcities, CITY);
     return CITY;
   };
   const extractUserDetails = l => {
@@ -278,18 +290,18 @@ const DrivinglicensefrontScreen = ({navigation}) => {
           1,
       );
     //.slice(-4);
-    console.log(
-      'name_address: ',
-      name_address,
-      l[az_index].split('\n').findIndex(x => x.toLowerCase().includes('az')),
-    );
+    // console.log(
+    //   'name_address: ',
+    //   name_address,
+    //   l[az_index].split('\n').findIndex(x => x.toLowerCase().includes('az')),
+    // );
     if (name_address.length < 4) {
       // let rest = l[az_index - 1]
       //   .split('\n')
       //   .slice(-1 * (4 - name_address.length));
-      console.log(
-        extract_name_address(l, az_index - 1, 4 - name_address.length),
-      );
+      // console.log(
+      //   extract_name_address(l, az_index - 1, 4 - name_address.length),
+      // );
       name_address = [
         ...extract_name_address(l, az_index - 1, 4 - name_address.length),
         ...name_address,
@@ -299,15 +311,19 @@ const DrivinglicensefrontScreen = ({navigation}) => {
     details.lastname = name_address[0].replace(/(1 )|(1)/g, '');
     details.address = name_address[2].replace(/^8 /, '');
     details.city = getcityname(name_address[3].match(cityrgx)[0]);
-    console.log(name_address, details);
-    console.log("First Name: " + details.firstname)
-    console.log("Last Name: " + details.lastname)
-    console.log("Address: " + details.address)
-    console.log("City: " + details.city)
+    // console.log(name_address, details);
+    console.log('First Name: ' + details.firstname);
+    console.log('Last Name : ' + details.lastname);
+    console.log('Address   : ' + details.address);
+    console.log('City      : ' + details.city);
+    console.log('DOB       : ' + details.dob);
+
+    setExtractedDetails(details);
+    setModalVisiblethree(true);
   };
   const extract_name_address = (l, index, rest_length) => {
     let rest = l[index].split('\n').slice(-1 * rest_length);
-    console.log(rest, rest_length);
+    // console.log(rest, rest_length);
     if (rest.length < rest_length) {
       rest = [
         ...extract_name_address(l, index - 1, rest_length - rest.length),
@@ -322,7 +338,7 @@ const DrivinglicensefrontScreen = ({navigation}) => {
     const result = await TextRecognition.recognize(imageUri, {
       visionIgnoreThreshold: 0.5,
     });
-    console.log(result);
+    // console.log(result);
     // const worker = workerRef.current;
     // await worker.load();
     // await worker.loadLanguage('eng');
@@ -334,6 +350,11 @@ const DrivinglicensefrontScreen = ({navigation}) => {
     // TesseractOcr.recognizeTokens(imageSource, LANG_ENGLISH, tessOptions);
     extractUserDetails(result);
   };
+
+  const retake = () => {
+    setModalVisiblethree(false)
+    opencamera()
+  }
 
   const handlesubmitform = async () => {
     if (resourcePath.mime === undefined) {
@@ -543,6 +564,89 @@ const DrivinglicensefrontScreen = ({navigation}) => {
                   ok
                 </Text>
               </Pressable>
+            </View>
+            <ModalStraps />
+          </View>
+        </View>
+      </Modal>
+
+      <Modal
+        animationType="fade"
+        transparent={true}
+        visible={modalVisiblethree}
+        onRequestClose={() => {
+          closeModal();
+        }}>
+        <View style={[styles.container, modalBackgroundStyle]}>
+          <View style={[innerContainerTransparentStyle, styles.modal_body]}>
+            <View style={styles.pd_20}>
+              <Text style={[styles.fs_26, styles.fw_bold, styles.fc_brown]}>
+                Please verify your details
+              </Text>
+              <View style={[styles.userDetails, styles.mT_04]}>
+                <Text style={[styles.userDetailsFiels]}>First Name: </Text>
+                <Text style={[styles.userDetailsValues]}>
+                  {extractedDetails.firstname}
+                </Text>
+              </View>
+              <View style={[styles.userDetails, styles.mT_04]}>
+                <Text style={[styles.userDetailsFiels]}>Last Name: </Text>
+                <Text style={[styles.userDetailsValues]}>
+                  {extractedDetails.lastname}
+                </Text>
+              </View>
+              <View style={[styles.userDetails, styles.mT_04]}>
+                <Text style={[styles.userDetailsFiels]}>Birth Day: </Text>
+                <Text style={[styles.userDetailsValues]}>
+                  {extractedDetails.dob}
+                </Text>
+              </View>
+              <View style={[styles.userDetails, styles.mT_04]}>
+                <Text style={[styles.userDetailsFiels]}>Address: </Text>
+                <Text style={[styles.userDetailsValues]}>
+                  {extractedDetails.address}
+                </Text>
+              </View>
+              <View style={[styles.userDetails, styles.mT_04]}>
+                <Text style={[styles.userDetailsFiels]}>City: </Text>
+                <Text style={[styles.userDetailsValues]}>
+                  {extractedDetails.city}
+                </Text>
+              </View>
+              <View style={[styles.userDetailsFooter]}>
+                <View style={[styles.footerElements]}>
+                  <Text style={[styles.fs_24]}>Incorrect Details</Text>
+                  <TouchableOpacity
+                    style={[
+                      {backgroundColor: 'red', padding: 10, borderRadius: 10, marginTop: 10},
+                    ]}
+                    onPress={() => retake()}>
+                    <Text style={[styles.fs_22, styles.fc_white]}>Retake</Text>
+                  </TouchableOpacity>
+                </View>
+                <View style={[styles.footerElements]}>
+                  <Text style={[styles.fs_24]}>Yes, Details are correct</Text>
+                  <TouchableOpacity
+                    style={[
+                      {backgroundColor: 'green', padding: 10, borderRadius: 10, marginTop: 10},
+                    ]}
+                    onPress={() => console.log("Dsadfasdf")}>
+                    <Text style={[styles.fs_22, styles.fc_white]}>Proceed</Text>
+                  </TouchableOpacity>
+                </View>
+              </View>
+              {/* <View style={[styles.imageselectoption]}>
+                <Pressable onPress={() => opencamera()}>
+                  <Text style={[styles.fs_22, styles.fc_blue]}>
+                    Take a photo
+                  </Text>
+                </Pressable>
+              </View>
+              <View style={[styles.imageselectoption, styles.bb_0]}>
+                <Pressable onPress={() => closeModal()}>
+                  <Text style={[styles.fs_22, styles.fc_blue]}>Cancle</Text>
+                </Pressable>
+              </View> */}
             </View>
             <ModalStraps />
           </View>
