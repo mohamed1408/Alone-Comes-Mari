@@ -160,12 +160,21 @@ const DrivinglicensefrontScreen = ({navigation}) => {
     );
     if (grantedcamera === PermissionsAndroid.RESULTS.GRANTED) {
       ImagePicker.openCamera({
-        width: 3300,
-        height: 2300,
+        // width: 3300,
+        // height: 2300,
+        // cropping: true,
+        // compressImageQuality: 0.8,
+        // mediaType: 'photo',
+        // useFrontCamera: true,
+
+        // width: 3300,
+        // height: 2300,
         cropping: true,
         compressImageQuality: 0.8,
         mediaType: 'photo',
-        useFrontCamera: true,
+        // useFrontCamera: true,
+        // cropperCircleOverlay: true,
+        freeStyleCropEnabled: true
       })
         .then(res => {
           if (res.didCancel) {
