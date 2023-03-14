@@ -216,11 +216,12 @@ const DrivinglicensefrontScreen = ({navigation}) => {
     let matchedchars = '',
       CITY = '',
       matchedcities,
-      wordcount = rawcityname.trim().split(' ').length;
+      wordcount = rawcityname.trim().split(' ').length,
+      lastmatchedcities;
     rawcityname
       .toLowerCase()
       .split('')
-      .forEach(c => {
+      .forEach((c, i) => {
         matchedchars += c;
         let rgx = new RegExp('^' + matchedchars);
         matchedcities = cities.filter(
@@ -228,13 +229,21 @@ const DrivinglicensefrontScreen = ({navigation}) => {
             rgx.test(x.toLowerCase()) &&
             x.toLowerCase().trim().split(' ').length == wordcount,
         );
-        if (matchedcities.length == 1) {
+        if (matchedcities.length == 0) {
+          CITY = lastmatchedcities[0];
+        } else if (i == rawcityname.toLowerCase().split('').length - 1) {
           CITY = matchedcities[0];
         } else {
-          CITY = matchedcities.filter(
-            x => x.toLowerCase() == rawcityname.toLowerCase(),
-          );
+          lastmatchedcities = matchedcities;
         }
+
+        // if (matchedcities.length == 1) {
+        //   CITY = matchedcities[0];
+        // } else {
+        //   CITY = matchedcities.filter(
+        //     x => x.toLowerCase() == rawcityname.toLowerCase(),
+        //   );
+        // }
       });
     // console.log(matchedcities, CITY);
     return CITY;
@@ -280,7 +289,8 @@ const DrivinglicensefrontScreen = ({navigation}) => {
         0,
         l[az_index].split('\n').findIndex(x => x.toLowerCase().includes('az')) +
           1,
-      );
+      )
+      .slice(-4);
     if (name_address.length < 4) {
       name_address = [
         ...extract_name_address(l, az_index - 1, 4 - name_address.length),
@@ -289,8 +299,11 @@ const DrivinglicensefrontScreen = ({navigation}) => {
     }
     details.firstname = name_address[1].replace(/(2 )|(2)/g, '');
     details.lastname = name_address[0].replace(/(1 )|(1)/g, '');
-    details.address = name_address[2].replace(/^8 /, '');
     details.city = getcityname(name_address[3].match(cityrgx)[0]);
+    details.address =
+      name_address[2].replace(/^8 /, '') +
+      ', ' +
+      name_address[3].replace(cityrgx, details.city);
     console.log('First Name: ' + details.firstname);
     console.log('Last Name : ' + details.lastname);
     console.log('Address   : ' + details.address);
@@ -335,7 +348,7 @@ const DrivinglicensefrontScreen = ({navigation}) => {
     } else {
       setspinner(true);
       setimageuploaderror('');
-      setModalVisiblethree(false)
+      setModalVisiblethree(false);
       console.log(resourcePath);
       // setspinner(false);
       // return;
@@ -348,7 +361,7 @@ const DrivinglicensefrontScreen = ({navigation}) => {
         uri: resourcePath.path,
         name: resourcePath.path.split('/').pop(),
       });
-
+      console.log(uploadData);
       const headers = {
         'Content-Type': 'multipart/form-data;charset=utf-8',
         'Access-Control-Allow-Origin': '*',
