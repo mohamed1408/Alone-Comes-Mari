@@ -160,21 +160,12 @@ const DrivinglicensefrontScreen = ({navigation}) => {
     );
     if (grantedcamera === PermissionsAndroid.RESULTS.GRANTED) {
       ImagePicker.openCamera({
-        // width: 3300,
-        // height: 2300,
-        // cropping: true,
-        // compressImageQuality: 0.8,
-        // mediaType: 'photo',
-        // useFrontCamera: true,
-
-        // width: 3300,
-        // height: 2300,
+        width: 3300,
+        height: 2300,
         cropping: true,
         compressImageQuality: 0.8,
         mediaType: 'photo',
-        // useFrontCamera: true,
-        // cropperCircleOverlay: true,
-        freeStyleCropEnabled: true
+        useFrontCamera: true,
       })
         .then(res => {
           if (res.didCancel) {
@@ -264,27 +255,19 @@ const DrivinglicensefrontScreen = ({navigation}) => {
       date2 = [];
     let cityrgx = new RegExp(/.+?(?=, AZ)/g);
     l.forEach((a, ai) => {
-      if (a.toLowerCase().includes('rest none')) {
-        //console.log(l[ai+1])
-      }
       if (a.match(date1Regex)) {
-        // console.log(a.match(date1Regex))
         date1 = [...date1, ...a.match(date1Regex)];
       }
       if (a.match(date2Regex)) {
-        //console.log(a.match(date2Regex))
         date2 = [...date2, ...a.match(date2Regex)];
       }
     });
     date1.forEach(d => {
       let isBirthday = false;
       let dregex = new RegExp('^(' + d.slice(0, 6) + ')(' + d.slice(-2) + ')$');
-      //console.log(d, dregex)
       date2.forEach(d2 => {
-        //console.log(dregex.test(d2))
         isBirthday = isBirthday || dregex.test(d2);
       });
-      //console.log("-".repeat(30))
       if (isBirthday) {
         details.dob = d;
       }
@@ -298,19 +281,7 @@ const DrivinglicensefrontScreen = ({navigation}) => {
         l[az_index].split('\n').findIndex(x => x.toLowerCase().includes('az')) +
           1,
       );
-    //.slice(-4);
-    // console.log(
-    //   'name_address: ',
-    //   name_address,
-    //   l[az_index].split('\n').findIndex(x => x.toLowerCase().includes('az')),
-    // );
     if (name_address.length < 4) {
-      // let rest = l[az_index - 1]
-      //   .split('\n')
-      //   .slice(-1 * (4 - name_address.length));
-      // console.log(
-      //   extract_name_address(l, az_index - 1, 4 - name_address.length),
-      // );
       name_address = [
         ...extract_name_address(l, az_index - 1, 4 - name_address.length),
         ...name_address,
@@ -320,7 +291,6 @@ const DrivinglicensefrontScreen = ({navigation}) => {
     details.lastname = name_address[0].replace(/(1 )|(1)/g, '');
     details.address = name_address[2].replace(/^8 /, '');
     details.city = getcityname(name_address[3].match(cityrgx)[0]);
-    // console.log(name_address, details);
     console.log('First Name: ' + details.firstname);
     console.log('Last Name : ' + details.lastname);
     console.log('Address   : ' + details.address);
@@ -329,10 +299,10 @@ const DrivinglicensefrontScreen = ({navigation}) => {
 
     setExtractedDetails(details);
     setModalVisiblethree(true);
+    return details;
   };
   const extract_name_address = (l, index, rest_length) => {
     let rest = l[index].split('\n').slice(-1 * rest_length);
-    // console.log(rest, rest_length);
     if (rest.length < rest_length) {
       rest = [
         ...extract_name_address(l, index - 1, rest_length - rest.length),
@@ -342,28 +312,22 @@ const DrivinglicensefrontScreen = ({navigation}) => {
     return rest;
   };
 
-  const extractText = async imageUri => {
-    // storeagePerm();
-    const result = await TextRecognition.recognize(imageUri, {
+  const extractText = async () => {
+    const result = await TextRecognition.recognize(resourcePath.path, {
       visionIgnoreThreshold: 0.5,
     });
-    // console.log(result);
-    // const worker = workerRef.current;
-    // await worker.load();
-    // await worker.loadLanguage('eng');
-    // await worker.initialize('eng');
-    // const response = await worker.recognize(imageUri);
-    // console.log(response.data.text);
-    // console.log(response.data);
-    // const tessOptions = {level: LEVEL_WORD};
-    // TesseractOcr.recognizeTokens(imageSource, LANG_ENGLISH, tessOptions);
-    extractUserDetails(result);
+    let scanned_details = extractUserDetails(result);
+    await AsyncStorage.setItem(
+      'scanned_details',
+      JSON.stringify(scanned_details),
+    );
+    await AsyncStorage.setItem('license_front_image_path', resourcePath.path);
   };
 
   const retake = () => {
-    setModalVisiblethree(false)
-    requestCameraPermission()
-  }
+    setModalVisiblethree(false);
+    requestCameraPermission();
+  };
 
   const handlesubmitform = async () => {
     if (resourcePath.mime === undefined) {
@@ -371,10 +335,10 @@ const DrivinglicensefrontScreen = ({navigation}) => {
     } else {
       setspinner(true);
       setimageuploaderror('');
+      setModalVisiblethree(false)
       console.log(resourcePath);
-      extractText(resourcePath.path);
-      setspinner(false);
-      return;
+      // setspinner(false);
+      // return;
 
       let uploadData = new FormData();
       uploadData.append('customerId', userid);
@@ -500,7 +464,7 @@ const DrivinglicensefrontScreen = ({navigation}) => {
 
       {/* button start here */}
       <View style={styles.nextbtn}>
-        <Pressable style={styles.button} onPress={() => handlesubmitform()}>
+        <Pressable style={styles.button} onPress={() => extractText()}>
           <Text style={styles.btntext}>{'Next >'}</Text>
         </Pressable>
       </View>
@@ -627,7 +591,12 @@ const DrivinglicensefrontScreen = ({navigation}) => {
                   <Text style={[styles.fs_24]}>Incorrect Details</Text>
                   <TouchableOpacity
                     style={[
-                      {backgroundColor: 'red', padding: 10, borderRadius: 10, marginTop: 10},
+                      {
+                        backgroundColor: 'red',
+                        padding: 10,
+                        borderRadius: 10,
+                        marginTop: 10,
+                      },
                     ]}
                     onPress={() => retake()}>
                     <Text style={[styles.fs_22, styles.fc_white]}>Retake</Text>
@@ -637,9 +606,14 @@ const DrivinglicensefrontScreen = ({navigation}) => {
                   <Text style={[styles.fs_24]}>Yes, Details are correct</Text>
                   <TouchableOpacity
                     style={[
-                      {backgroundColor: 'green', padding: 10, borderRadius: 10, marginTop: 10},
+                      {
+                        backgroundColor: 'green',
+                        padding: 10,
+                        borderRadius: 10,
+                        marginTop: 10,
+                      },
                     ]}
-                    onPress={() => console.log("Dsadfasdf")}>
+                    onPress={() => handlesubmitform()}>
                     <Text style={[styles.fs_22, styles.fc_white]}>Proceed</Text>
                   </TouchableOpacity>
                 </View>
