@@ -96,6 +96,7 @@ const DrivinglicensefrontScreen = ({navigation}) => {
   };
 
   const [resourcePath, setresourcePath] = React.useState({});
+  const [profileResourcePath, setProfileResourcePath] = React.useState({});
   const [imageuploaderror, setimageuploaderror] = React.useState('');
   const [modalVisible, setModalVisible] = React.useState(false);
   const [modalVisibletwo, setModalVisibletwo] = React.useState(false);
@@ -137,6 +138,7 @@ const DrivinglicensefrontScreen = ({navigation}) => {
             let source = res;
             setresourcePath(source);
             setModalVisible(false);
+            profilePicFromLicense(source.path);
           }
         })
         .catch(e => {
@@ -179,11 +181,57 @@ const DrivinglicensefrontScreen = ({navigation}) => {
             let source = res;
             setresourcePath(source);
             setModalVisible(false);
+            profilePicFromLicense(source.path);
           }
         })
         .catch(e => {
           setModalVisible(false);
         });
+    } else {
+      console.log('Camera permission denied');
+    }
+  };
+
+  const profilePicFromLicense = async imageUri => {
+    const grantedstorage = await PermissionsAndroid.request(
+      PermissionsAndroid.PERMISSIONS.WRITE_EXTERNAL_STORAGE,
+      {
+        title: 'App Camera Permission',
+        message: 'App needs access to your camera ',
+        buttonNeutral: 'Ask Me Later',
+        buttonNegative: 'Cancel',
+        buttonPositive: 'OK',
+      },
+    );
+    if (grantedstorage === PermissionsAndroid.RESULTS.GRANTED) {
+      ImagePicker.openCropper({
+        width: 3000,
+        height: 3000,
+        path: imageUri,
+        cropperCircleOverlay: true,
+        cropping: true,
+        cropperToolbarTitle: 'Align the face inside the circle',
+      }).then(
+        res => {
+          if (res.didCancel) {
+            console.log('User cancelled image picker');
+          } else if (res.error) {
+            console.log('ImagePicker Error: ', res.error);
+          } else if (res.customButton) {
+            console.log('User tapped custom button: ', res.customButton);
+            alert(res.customButton);
+          } else {
+            let source = res;
+            console.log(source);
+            setProfileResourcePath(source);
+            // setresourcePath(source);
+            // setModalVisible(false);
+          }
+        },
+        err => {
+          console.log(err);
+        },
+      );
     } else {
       console.log('Camera permission denied');
     }
@@ -208,9 +256,6 @@ const DrivinglicensefrontScreen = ({navigation}) => {
 
   var innerContainerTransparentStyle = {backgroundColor: '#fff'};
 
-  //   useEventListener('onProgressChange', p => {
-  //     setProgress(p.percent / 100);
-  //   });
   const getcityname = rawcityname => {
     // console.log(rawcityname);
     let matchedchars = '',
@@ -324,7 +369,6 @@ const DrivinglicensefrontScreen = ({navigation}) => {
     }
     return rest;
   };
-
   const extractText = async () => {
     const result = await TextRecognition.recognize(resourcePath.path, {
       visionIgnoreThreshold: 0.5,
@@ -335,6 +379,10 @@ const DrivinglicensefrontScreen = ({navigation}) => {
       JSON.stringify(scanned_details),
     );
     await AsyncStorage.setItem('license_front_image_path', resourcePath.path);
+    await AsyncStorage.setItem(
+      'profilePicResource',
+      JSON.stringify(profileResourcePath),
+    );
   };
 
   const retake = () => {
@@ -569,6 +617,11 @@ const DrivinglicensefrontScreen = ({navigation}) => {
               <Text style={[styles.fs_26, styles.fw_bold, styles.fc_brown]}>
                 Please verify your details
               </Text>
+              <Image
+                source={{uri: profileResourcePath.path}}
+                style={styles.proimage_d}
+              />
+
               <View style={[styles.userDetails, styles.mT_04]}>
                 <Text style={[styles.userDetailsFiels]}>First Name: </Text>
                 <Text style={[styles.userDetailsValues]}>

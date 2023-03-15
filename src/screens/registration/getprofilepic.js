@@ -30,9 +30,12 @@ const ProfilepicScreen = ({navigation}) => {
     async function getdata() {
       const userid = await AsyncStorage.getItem('userid');
       const useremail = await AsyncStorage.getItem('useremail');
+      const profilePicres = await AsyncStorage.getItem('profilePicResource')
+
       setuserid(userid);
       setuseremail(useremail);
-      profilePicFromLicense();
+      setresourcePath(JSON.parse(profilePicres))
+      // profilePicFromLicense();
     }
     getdata();
 
